@@ -48,6 +48,7 @@ dependencies {
     implementation "androidx.annotation:annotation:$androidXAnnotations"
 
     implementation "androidx.cardview:cardview:$cardVersion"
+    implementation platform('com.google.firebase:firebase-bom:30.4.1')
     implementation "com.google.android.material:material:$materialVersion"
     implementation "androidx.recyclerview:recyclerview:$recyclerViewVersion"
     implementation "androidx.constraintlayout:constraintlayout:$constraintVersion"
@@ -76,8 +77,8 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion"
 
     //Koin
-    implementation "org.koin:koin-android:$koinVersion"
-    implementation "org.koin:koin-androidx-viewmodel:$koinVersion"
+    implementation "io.insert-koin:koin-android:$koinVersion"
+    implementation "io.insert-koin:koin-core:$koinVersion"
 
 
     // Dependencies for local unit tests
