@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.udacity.project4">
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
@@ -23,7 +24,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme.NoActionBar">
-        <activity android:name=".locationreminders.ReminderDescriptionActivity" />
+        <!-- adding parent activity to ReminderDescriptionActivity to increase user engagement
+        with the app open tapping on a reminder notification -->
+        <activity
+            android:name=".locationreminders.ReminderDescriptionActivity"
+            android:parentActivityName=".locationreminders.RemindersActivity" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -50,12 +55,19 @@
 
         <receiver
             android:name=".locationreminders.geofence.GeofenceBroadcastReceiver"
-            android:enabled="true"
-            android:exported="true" />
-        <service
-            android:name=".locationreminders.geofence.GeofenceTransitionsJobIntentService"
-            android:exported="true"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
+            android:enabled="true" />
+
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="com.udacity.project4.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <!-- If you are using androidx.startup to initialize other components -->
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup"
+                tools:node="remove" />
+        </provider>
     </application>
 
 </manifest>

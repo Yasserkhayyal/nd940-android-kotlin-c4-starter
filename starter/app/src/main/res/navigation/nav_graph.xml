@@ -16,6 +16,11 @@
         android:id="@+id/saveReminderFragment"
         android:name="com.udacity.project4.locationreminders.savereminder.SaveReminderFragment"
         android:label="Add Reminder">
+        <argument
+            android:name="reminderDataItem"
+            android:defaultValue="@null"
+            app:argType="com.udacity.project4.locationreminders.reminderslist.ReminderDataItem"
+            app:nullable="true" />
         <action
             android:id="@+id/action_saveReminderFragment_to_reminderListFragment"
             app:destination="@id/reminderListFragment" />

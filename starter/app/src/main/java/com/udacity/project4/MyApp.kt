@@ -1,47 +1,34 @@
 package com.udacity.project4
 
 import android.app.Application
-import com.udacity.project4.locationreminders.data.ReminderDataSource
-import com.udacity.project4.locationreminders.data.local.LocalDB
-import com.udacity.project4.locationreminders.data.local.RemindersLocalRepository
-import com.udacity.project4.locationreminders.reminderslist.RemindersListViewModel
-import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
-import org.koin.android.ext.koin.androidContext
-import org.koin.androidx.viewmodel.dsl.viewModel
-import org.koin.core.context.startKoin
-import org.koin.dsl.module
+import androidx.work.Configuration
+import com.udacity.project4.di.AppComponent
+import com.udacity.project4.di.DaggerAppComponent
+import javax.inject.Inject
 
-class MyApp : Application() {
+class MyApp : Application(), Configuration.Provider {
+    @Inject
+    lateinit var workerConfiguration: Configuration
+
+    // Instance of the AppComponent that will be used by all the Activities in the project
+    val appComponent: AppComponent by lazy {
+        initializeComponent()
+    }
+
+    private fun initializeComponent(): AppComponent {
+        // Creates an instance of AppComponent using its Factory constructor
+        // We pass the applicationContext that will be used as Context in the graph
+        return DaggerAppComponent.factory().create(this)
+    }
+
+    // Setup custom configuration for WorkManager with a DelegatingWorkerFactory
+    override fun getWorkManagerConfiguration(): Configuration {
+        return workerConfiguration
+    }
 
     override fun onCreate() {
         super.onCreate()
-
-        /**
-         * use Koin Library as a service locator
-         */
-        val myModule = module {
-            //Declare a ViewModel - be later inject into Fragment with dedicated injector using by viewModel()
-            viewModel {
-                RemindersListViewModel(
-                    get(),
-                    get() as ReminderDataSource
-                )
-            }
-            //Declare singleton definitions to be later injected using by inject()
-            single {
-                //This view model is declared singleton to be used across multiple fragments
-                SaveReminderViewModel(
-                    get(),
-                    get() as ReminderDataSource
-                )
-            }
-            single { RemindersLocalRepository(get()) as ReminderDataSource }
-            single { LocalDB.createRemindersDao(this@MyApp) }
-        }
-
-        startKoin {
-            androidContext(this@MyApp)
-            modules(listOf(myModule))
-        }
+        appComponent.inject(this)
     }
+
 }
