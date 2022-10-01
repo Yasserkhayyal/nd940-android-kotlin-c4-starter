@@ -117,12 +117,8 @@ class SaveReminderViewModel @Inject constructor(
 
     fun saveSelectedLocation(latLng: LatLng) {
         selectedPOI.value = null
-        reminderSelectedLocationStr.value = String.format(
-            Locale.getDefault(),
-            app.getString(R.string.lat_long_snippet),
-            latLng.latitude,
-            latLng.longitude
-        )
+        reminderSelectedLocationStr.value =
+            composeLocationFromLatLng(latLng.latitude, latLng.longitude)
         latitude.value = latLng.latitude
         longitude.value = latLng.longitude
     }
