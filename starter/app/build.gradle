@@ -15,7 +15,7 @@ android {
         targetSdkVersion rootProject.targetSdkVersion
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "com.udacity.project4.CustomTestRunner"
     }
     buildTypes {
         release {
@@ -37,13 +37,21 @@ android {
         returnDefaultValues = true
     }
 
-    //dataBinding {
-    //    enabled = true
-    //    enabledForTests = true
-    //}
-    buildFeatures {
-        dataBinding true
+    dataBinding {
+        enabled = true
+        enabledForTests = true
     }
+
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging true
+        }
+        exclude 'META-INF/AL2.0'
+        exclude 'META-INF/LGPL2.1'
+        exclude 'MANIFEST.MF'
+        exclude 'META-INF/*.md'
+    }
+
 }
 
 dependencies {
@@ -82,8 +90,11 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion"
 
     //Dagger2
-    kapt "com.google.dagger:dagger-compiler:$daggerVersion"
+    implementation "com.google.dagger:dagger-android-support:$daggerVersion"
     implementation "com.google.dagger:dagger:$daggerVersion"
+    kaptAndroidTest "com.google.dagger:dagger-compiler:$daggerVersion"
+    kapt "com.google.dagger:dagger-compiler:$daggerVersion"
+    kapt "com.google.dagger:dagger-android-processor:$daggerVersion"
 
 
     // Dependencies for local unit tests
@@ -92,9 +103,9 @@ dependencies {
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion"
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion"
     testImplementation "org.robolectric:robolectric:$robolectricVersion"
-    testImplementation "com.google.truth:truth:$truthVersion"
-    testImplementation "org.mockito:mockito-core:$mockitoVersion"
     testImplementation "io.mockk:mockk:$mockkVersion"
+    testImplementation "io.mockk:mockk-agent:$mockkVersion"
+    testImplementation "io.mockk:mockk-android:$mockkVersion"
     testImplementation "org.amshove.kluent:kluent:$kluentVersion"
 
     // AndroidX Test - JVM testing
@@ -117,10 +128,8 @@ dependencies {
     androidTestImplementation "junit:junit:$junitVersion"
     // Once https://issuetracker.google.com/127986458 is fixed this can be testImplementation
     debugImplementation "androidx.fragment:fragment-testing:$fragmentVersion"
-    testImplementation "androidx.test:core:$androidXTestCoreVersion"
-    androidTestImplementation "org.mockito:mockito-core:$mockitoVersion"
-    androidTestImplementation "com.linkedin.dexmaker:dexmaker-mockito:$dexMakerVersion"
-
+    androidTestImplementation "io.mockk:mockk-android:$mockkVersion"
+    androidTestImplementation "io.mockk:mockk-agent:$mockkVersion"
 
     //Maps & Geofencing
     implementation "com.google.android.gms:play-services-location:$playServicesVersion"

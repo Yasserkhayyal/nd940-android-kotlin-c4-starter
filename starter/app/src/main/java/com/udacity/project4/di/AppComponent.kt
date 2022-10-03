@@ -2,6 +2,7 @@ package com.udacity.project4.di
 
 import com.udacity.project4.MyApp
 import com.udacity.project4.locationreminders.RemindersActivity
+import com.udacity.project4.locationreminders.data.local.RemindersLocalRepository
 import com.udacity.project4.locationreminders.reminderslist.di.ReminderListComponent
 import com.udacity.project4.locationreminders.savereminder.SaveReminderFragment
 import com.udacity.project4.locationreminders.savereminder.selectreminderlocation.SelectLocationFragment
@@ -29,4 +30,6 @@ interface AppComponent {
     fun inject(saveReminderFragment: SaveReminderFragment)
     fun inject(selectLocationFragment: SelectLocationFragment)
     fun inject(myApp: MyApp)
+
+    fun getRemindersLocalRepository(): RemindersLocalRepository
 }

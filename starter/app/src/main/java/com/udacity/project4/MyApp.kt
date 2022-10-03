@@ -6,7 +6,7 @@ import com.udacity.project4.di.AppComponent
 import com.udacity.project4.di.DaggerAppComponent
 import javax.inject.Inject
 
-class MyApp : Application(), Configuration.Provider {
+open class MyApp : Application(), Configuration.Provider {
     @Inject
     lateinit var workerConfiguration: Configuration
 
@@ -15,7 +15,7 @@ class MyApp : Application(), Configuration.Provider {
         initializeComponent()
     }
 
-    private fun initializeComponent(): AppComponent {
+    open fun initializeComponent(): AppComponent {
         // Creates an instance of AppComponent using its Factory constructor
         // We pass the applicationContext that will be used as Context in the graph
         return DaggerAppComponent.factory().create(this)
