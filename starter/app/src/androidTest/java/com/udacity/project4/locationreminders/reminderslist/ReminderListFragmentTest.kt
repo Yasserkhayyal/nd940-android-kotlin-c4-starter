@@ -5,7 +5,6 @@ import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.navigation.NavController
 import androidx.navigation.NavDirections
 import androidx.navigation.Navigation
-import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.action.ViewActions.click
@@ -13,11 +12,9 @@ import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
-import com.google.firebase.auth.FirebaseAuth
 import com.udacity.project4.R
-import com.udacity.project4.TestApplication
+import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
-import com.udacity.project4.locationreminders.di.TestAppComponent
 import com.udacity.project4.util.DataBindingIdlingResource
 import com.udacity.project4.util.monitorFragment
 import com.udacity.project4.utils.EspressoIdlingResource
@@ -29,6 +26,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.koin.core.context.GlobalContext.get
 
 @RunWith(AndroidJUnit4::class)
 @ExperimentalCoroutinesApi
@@ -37,8 +35,7 @@ import org.junit.runner.RunWith
 class ReminderListFragmentTest {
 
     private lateinit var fragmentScenario: FragmentScenario<ReminderListFragment>
-    private val testApp = getApplicationContext<TestApplication>()
-    private val fakeDataSource = (testApp.appComponent as TestAppComponent).getFakeDataSource()
+    private val fakeDataSource by get().koin.inject<ReminderDataSource>()
 
     // An idling resource that waits for Data Binding to have no pending bindings.
     private val dataBindingIdlingResource = DataBindingIdlingResource()
@@ -48,8 +45,6 @@ class ReminderListFragmentTest {
         runBlocking {
             fakeDataSource.deleteAllReminders()
         }
-        mockkStatic(FirebaseAuth::class)
-        every { FirebaseAuth.getInstance().currentUser } returns mockk()
         IdlingRegistry.getInstance().register(EspressoIdlingResource.countingIdlingResource)
         IdlingRegistry.getInstance().register(dataBindingIdlingResource)
     }
@@ -114,26 +109,6 @@ class ReminderListFragmentTest {
         //Then
         onView(withId(R.id.addReminderFAB)).perform(click())
         verify { navController.navigate(ReminderListFragmentDirections.toSaveReminder(null)) }
-        fragmentScenario.close()
-    }
-
-    //flaky
-    @Test
-    fun given_no_logged_in_user_AuthenticationActivity_is_shown() {
-        //Given
-        val navController = mockk<NavController> {
-            every { navigate(any<NavDirections>()) } just runs
-        }
-        every { FirebaseAuth.getInstance().currentUser } returns null
-        //When
-        fragmentScenario =
-            launchFragmentInContainer<ReminderListFragment>(themeResId = R.style.AppTheme).onFragment {
-                Navigation.setViewNavController(it.view!!, navController)
-            }
-        dataBindingIdlingResource.monitorFragment(fragmentScenario)
-
-        //Then
-        onView(withId(R.id.login_btn)).check(matches(isDisplayed()))
         fragmentScenario.close()
     }
 

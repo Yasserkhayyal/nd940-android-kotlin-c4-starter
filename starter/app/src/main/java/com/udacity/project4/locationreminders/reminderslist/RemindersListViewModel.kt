@@ -9,9 +9,8 @@ import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.data.dto.Result
 import com.udacity.project4.utils.wrapEspressoIdlingResource
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-class RemindersListViewModel @Inject constructor(
+class RemindersListViewModel(
     app: Application,
     private val dataSource: ReminderDataSource
 ) : BaseViewModel(app) {

@@ -6,7 +6,6 @@ import com.udacity.project4.locationreminders.data.dto.Result
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
 /**
  * Concrete implementation of a data source as a db.
@@ -16,7 +15,7 @@ import javax.inject.Inject
  * @param remindersDao the dao that does the Room db operations
  * @param ioDispatcher a coroutine dispatcher to offload the blocking IO tasks
  */
-class RemindersLocalRepository @Inject constructor(
+class RemindersLocalRepository(
     private val remindersDao: RemindersDao,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ReminderDataSource {

@@ -11,9 +11,7 @@ import android.provider.Settings
 import android.util.Log
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
 import androidx.core.app.ActivityCompat
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
@@ -26,12 +24,11 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.material.snackbar.Snackbar
 import com.udacity.project4.BuildConfig
-import com.udacity.project4.MyApp
 import com.udacity.project4.R
 import com.udacity.project4.base.BaseActivity
 import com.udacity.project4.databinding.ActivityRemindersBinding
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
-import javax.inject.Inject
+import org.koin.android.ext.android.inject
 
 /**
  * The RemindersActivity that holds the reminders fragments
@@ -39,10 +36,7 @@ import javax.inject.Inject
 class RemindersActivity : BaseActivity() {
     private val tag = RemindersActivity::class.java.simpleName
 
-    @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
-
-    val viewModel by viewModels<SaveReminderViewModel> { viewModelFactory }
+    val viewModel by inject<SaveReminderViewModel>()
 
     private lateinit var binding: ActivityRemindersBinding
     private lateinit var navController: NavController
@@ -90,7 +84,6 @@ class RemindersActivity : BaseActivity() {
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        (application as MyApp).appComponent.inject(this)
         super.onCreate(savedInstanceState)
         binding = setLayoutContainerContent(R.layout.activity_reminders) as ActivityRemindersBinding
         navController =

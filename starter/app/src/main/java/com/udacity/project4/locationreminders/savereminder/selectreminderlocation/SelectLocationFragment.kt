@@ -1,7 +1,6 @@
 package com.udacity.project4.locationreminders.savereminder.selectreminderlocation
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.res.Resources
 import android.location.Location
 import android.os.Bundle
@@ -9,9 +8,7 @@ import android.util.Log
 import android.view.*
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
-import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -23,7 +20,6 @@ import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PointOfInterest
 import com.google.android.gms.tasks.Task
-import com.udacity.project4.MyApp
 import com.udacity.project4.R
 import com.udacity.project4.base.BaseFragment
 import com.udacity.project4.base.NavigationCommand
@@ -32,22 +28,15 @@ import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 import java.util.*
-import javax.inject.Inject
 
 class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
-    @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
 
-    override val _viewModel by activityViewModels<SaveReminderViewModel> { viewModelFactory }
+    override val _viewModel by inject<SaveReminderViewModel>()
     private val mTag = SelectLocationFragment::class.java.simpleName
     private lateinit var binding: FragmentSelectLocationBinding
     private lateinit var mMap: GoogleMap
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        (requireActivity().application as MyApp).appComponent.inject(this)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?

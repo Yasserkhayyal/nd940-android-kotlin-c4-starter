@@ -2,20 +2,16 @@ package com.udacity.project4.locationreminders.savereminder
 
 import android.annotation.SuppressLint
 import android.app.PendingIntent
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.navArgs
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingClient
 import com.google.android.gms.location.GeofencingRequest
-import com.udacity.project4.MyApp
 import com.udacity.project4.R
 import com.udacity.project4.base.BaseFragment
 import com.udacity.project4.base.NavigationCommand
@@ -24,20 +20,17 @@ import com.udacity.project4.locationreminders.geofence.ACTION_GEOFENCE_EVENT
 import com.udacity.project4.locationreminders.geofence.GeofenceBroadcastReceiver
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
+import org.koin.android.ext.android.inject
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
 
 private const val GEOFENCE_RADIUS_IN_METERS = 100f
 private const val TAG = "SaveReminderFragment"
 
 class SaveReminderFragment : BaseFragment() {
-    @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
 
-    @Inject
-    lateinit var geofencingClient: GeofencingClient
+    val geofencingClient by inject<GeofencingClient>()
 
-    override val _viewModel by activityViewModels<SaveReminderViewModel> { viewModelFactory }
+    override val _viewModel by inject<SaveReminderViewModel>()
     private val args: SaveReminderFragmentArgs by navArgs()
     private lateinit var binding: FragmentSaveReminderBinding
 
@@ -48,11 +41,6 @@ class SaveReminderFragment : BaseFragment() {
         // Use FLAG_UPDATE_CURRENT so that you get the same pending intent back when calling
         // addGeofences().
         PendingIntent.getBroadcast(requireContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        (requireActivity().application as MyApp).appComponent.inject(this)
     }
 
     override fun onCreateView(

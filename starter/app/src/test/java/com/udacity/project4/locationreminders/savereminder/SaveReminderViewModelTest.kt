@@ -23,6 +23,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.koin.core.context.stopKoin
 import org.robolectric.annotation.Config
 import java.util.*
 
@@ -62,6 +63,7 @@ class SaveReminderViewModelTest {
 
     @Before
     fun setup() {
+        stopKoin() //stop koin before each test case
         testSubject = SaveReminderViewModel(application, fakeDataSource)
         testSubject.reminderTitle.observeForever(reminderTitleLiveDataObserver)
         testSubject.reminderDescription.observeForever(reminderDescriptionLiveDataObserver)

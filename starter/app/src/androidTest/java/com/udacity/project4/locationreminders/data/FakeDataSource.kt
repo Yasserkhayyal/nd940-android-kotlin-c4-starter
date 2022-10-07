@@ -2,10 +2,9 @@ package com.udacity.project4.locationreminders.data
 
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.data.dto.Result
-import javax.inject.Inject
 
 //Use FakeDataSource that acts as a test double to the LocalDataSource
-class FakeDataSource @Inject constructor() : ReminderDataSource {
+class FakeDataSource : ReminderDataSource {
 
     private val reminderList = mutableListOf<ReminderDTO>()
     var shouldShowError = false

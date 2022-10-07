@@ -14,9 +14,8 @@ import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import com.udacity.project4.utils.SingleLiveEvent
 import kotlinx.coroutines.launch
 import java.util.*
-import javax.inject.Inject
 
-class SaveReminderViewModel @Inject constructor(
+class SaveReminderViewModel(
     private val app: Application,
     private val dataSource: ReminderDataSource
 ) : BaseViewModel(app) {

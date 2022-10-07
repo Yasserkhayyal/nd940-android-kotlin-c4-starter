@@ -4,8 +4,9 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingRegistry
-import androidx.test.espresso.assertion.ViewAssertions
-import androidx.test.espresso.matcher.ViewMatchers
+import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
+import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.udacity.project4.locationreminders.RemindersActivity
@@ -20,6 +21,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.koin.core.context.GlobalContext.get
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -28,8 +30,9 @@ import org.junit.runner.RunWith
 class RemindersActivityTest {
 
     private lateinit var activityScenario: ActivityScenario<RemindersActivity>
-    private lateinit var repository: ReminderDataSource
+    private val repository: ReminderDataSource by get().koin.inject()
     private lateinit var appContext: MyApp
+
 
     // An idling resource that waits for Data Binding to have no pending bindings.
     private val dataBindingIdlingResource = DataBindingIdlingResource()
@@ -37,7 +40,6 @@ class RemindersActivityTest {
     @Before
     fun setup() {
         appContext = getApplicationContext()
-        repository = appContext.appComponent.getRemindersLocalRepository()
         runBlocking {
             repository.deleteAllReminders()
         }
@@ -52,12 +54,11 @@ class RemindersActivityTest {
     }
 
     @Test
-    fun given_required_permissions_are_revoked_then_expected_toast_is_showing() = runTest {
+    fun initial_state_noDataTextView_isDisplayedUi() = runTest {
         activityScenario = ActivityScenario.launch(RemindersActivity::class.java)
         dataBindingIdlingResource.monitorActivity(activityScenario)
 
-        onView(ViewMatchers.withId(R.id.noDataTextView)).check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
+        onView(withId(R.id.noDataTextView)).check(matches(isDisplayed()))
     }
-
 
 }

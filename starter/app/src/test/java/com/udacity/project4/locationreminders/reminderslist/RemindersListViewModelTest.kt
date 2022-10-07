@@ -19,6 +19,8 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.koin.core.context.stopKoin
+import org.koin.test.KoinTest
 import org.robolectric.annotation.Config
 
 @RunWith(AndroidJUnit4::class)
@@ -43,6 +45,7 @@ class RemindersListViewModelTest {
 
     @Before
     fun setup() {
+        stopKoin() //stop koin before each test case
         testSubject = RemindersListViewModel(application, fakeDataSource)
         testSubject.showLoading.observeForever(loadingLiveDataObserver)
         testSubject.remindersList.observeForever(reminderListLiveDataObserver)
