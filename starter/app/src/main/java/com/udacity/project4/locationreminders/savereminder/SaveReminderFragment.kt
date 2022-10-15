@@ -1,13 +1,16 @@
 package com.udacity.project4.locationreminders.savereminder
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.RequiresApi
 import androidx.navigation.fragment.navArgs
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingClient
@@ -55,6 +58,7 @@ class SaveReminderFragment : BaseFragment() {
         return binding.root
     }
 
+    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.selectLocationViewGroup.setOnClickListener {
@@ -88,7 +92,15 @@ class SaveReminderFragment : BaseFragment() {
 
         binding.saveReminder.setOnClickListener {
             if (_viewModel.validateEnteredData()) {
-                _viewModel.checkLocationPermissionsGranted()//validate that permissions are granted before adding the geofence
+                val requestedPermissions = if (_viewModel.runningQOrLater) {
+                    arrayOf(
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                    )
+                } else {
+                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
+                }
+                _viewModel.requestLocationPermissions(requestedPermissions)
             }
         }
     }

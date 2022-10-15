@@ -1,5 +1,6 @@
 package com.udacity.project4.locationreminders.savereminder.selectreminderlocation
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.res.Resources
 import android.location.Location
@@ -104,7 +105,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         setMapLongClick(map)
         setPoiClick(map)
         setMapStyle(map)
-        _viewModel.checkLocationPermissionsGranted()
+        _viewModel.requestLocationPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION))
     }
 
     private fun onLocationSelected(latLng: LatLng) {

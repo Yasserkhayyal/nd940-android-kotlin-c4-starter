@@ -1,6 +1,5 @@
 package com.udacity.project4.locationreminders
 
-import android.Manifest
 import android.annotation.TargetApi
 import android.content.Intent
 import android.content.IntentSender
@@ -42,25 +41,25 @@ class RemindersActivity : BaseActivity() {
     private lateinit var navController: NavController
     private lateinit var appBarConfiguration: AppBarConfiguration
 
-    private val runningQOrLater =
-        android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q
-
     private val appPermissionSettingsActivityLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            if (foregroundAndBackgroundLocationPermissionApproved()) {
+            if (checkPermissionsGrantedFromAppSettings(viewModel.locationPermissionsRequested.value)) {
                 checkDeviceLocationSettings()
             } else {
-                requestForegroundAndBackgroundLocationPermissions()
+                viewModel.locationPermissionsRequested.value?.let { permissions ->
+                    requestLocationPermissions(permissions)
+                }
             }
         }
     private val locationPermissionActivityLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { grantResults ->
-            if (
-                grantResults.isEmpty() ||
-                grantResults[Manifest.permission.ACCESS_FINE_LOCATION] == false || !grantResults.getOrElse(
-                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                ) { true }
+            if (checkPermissionsGranted(
+                    grantResults,
+                    viewModel.locationPermissionsRequested.value
+                )
             ) {
+                checkDeviceLocationSettings()
+            } else {
                 // Permission denied.
                 Snackbar.make(
                     activityBaseBinding.coordinatorLayout,
@@ -72,8 +71,6 @@ class RemindersActivity : BaseActivity() {
                         data = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null)
                     })
                 }.show()
-            } else {
-                checkDeviceLocationSettings()
             }
         }
 
@@ -91,8 +88,8 @@ class RemindersActivity : BaseActivity() {
         appBarConfiguration = AppBarConfiguration(navController.graph)
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration)
         viewModel.locationPermissionsRequested.observe(this) {
-            if (it) {
-                requestForegroundAndBackgroundLocationPermissions()
+            if (!it.isNullOrEmpty()) {
+                requestLocationPermissions(it)
             }
         }
     }
@@ -107,28 +104,21 @@ class RemindersActivity : BaseActivity() {
     }
 
     @TargetApi(29)
-    private fun foregroundAndBackgroundLocationPermissionApproved(): Boolean {
-        val foregroundLocationApproved = (PackageManager.PERMISSION_GRANTED ==
+    private fun checkPermissionsGrantedFromAppSettings(permissionsRequested: Array<String>?): Boolean {
+        permissionsRequested?.onEach {
+            if (PackageManager.PERMISSION_DENIED ==
                 ActivityCompat.checkSelfPermission(
                     this,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ))
-        val backgroundPermissionApproved =
-            if (runningQOrLater) {
-                PackageManager.PERMISSION_GRANTED == ActivityCompat.checkSelfPermission(
-                    this, Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                    it
                 )
-            } else {
-                true
-            }
-        return foregroundLocationApproved && backgroundPermissionApproved
+            ) return false
+        }
+        return true
     }
 
     @TargetApi(29)
-    private fun requestForegroundAndBackgroundLocationPermissions() {
-        var permissionsArray = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
-        if (runningQOrLater) permissionsArray += Manifest.permission.ACCESS_BACKGROUND_LOCATION
-        locationPermissionActivityLauncher.launch(permissionsArray)
+    private fun requestLocationPermissions(permissions: Array<String>) {
+        locationPermissionActivityLauncher.launch(permissions)
     }
 
     /*
@@ -167,7 +157,7 @@ class RemindersActivity : BaseActivity() {
             showSnackBarRequestingAccessToUserLocation()
         }
         locationSettingsResponseTask.addOnSuccessListener {
-            if (foregroundAndBackgroundLocationPermissionApproved()) {
+            if (checkPermissionsGrantedFromAppSettings(viewModel.locationPermissionsRequested.value)) {
                 viewModel.setLocationPermissionsGranted()
             }
         }
@@ -180,5 +170,16 @@ class RemindersActivity : BaseActivity() {
         ).setAction(android.R.string.ok) {
             checkDeviceLocationSettings()
         }.show()
+
+    private fun checkPermissionsGranted(
+        grantResults: Map<String, Boolean>,
+        permissionsRequested: Array<String>?
+    ): Boolean {
+        if (permissionsRequested.isNullOrEmpty()) return false
+        permissionsRequested.onEach {
+            if (grantResults.isEmpty() || grantResults[it] == false) return false
+        }
+        return true
+    }
 
 }

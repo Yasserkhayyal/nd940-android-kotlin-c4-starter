@@ -20,13 +20,16 @@ class SaveReminderViewModel(
     private val dataSource: ReminderDataSource
 ) : BaseViewModel(app) {
 
+    val runningQOrLater =
+        android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q
+
     val reminderTitle = MutableLiveData<String?>()
     val reminderDescription = MutableLiveData<String?>()
     val reminderSelectedLocationStr = MutableLiveData<String?>()
     val selectedPOI = MutableLiveData<PointOfInterest?>()
     val latitude = MutableLiveData<Double?>()
     val longitude = MutableLiveData<Double?>()
-    val locationPermissionsRequested = SingleLiveEvent<Boolean>()
+    val locationPermissionsRequested = SingleLiveEvent<Array<String>>()
     val locationPermissionsGranted = SingleLiveEvent<Boolean>()
     val locationSelected = SingleLiveEvent<Boolean>()
     val reminderDataItem = MutableLiveData<ReminderDataItem?>()
@@ -98,7 +101,7 @@ class SaveReminderViewModel(
         }
     }
 
-    //in case the ReminderDataItem is passed back from the ReminderListFragment fro editing purposes
+    //in case the ReminderDataItem is passed back from the ReminderListFragment for editing purposes
     fun decomposeReminderItem(reminderData: ReminderDataItem) {
         reminderTitle.value = reminderData.title
         reminderDescription.value = reminderData.description
@@ -129,8 +132,8 @@ class SaveReminderViewModel(
         longitude.value = poi.latLng.longitude
     }
 
-    fun checkLocationPermissionsGranted() {
-        locationPermissionsRequested.value = true
+    fun requestLocationPermissions(locationPermissionsRequested: Array<String>) {
+        this.locationPermissionsRequested.value = locationPermissionsRequested
     }
 
     fun setLocationPermissionsGranted() {
@@ -139,6 +142,7 @@ class SaveReminderViewModel(
 
     fun clearEditingMode() {
         isEditingMode = false
+        locationSelected.value = false
     }
 
     private fun composeLocationFromLatLng(latitude: Double, longitude: Double) = String.format(

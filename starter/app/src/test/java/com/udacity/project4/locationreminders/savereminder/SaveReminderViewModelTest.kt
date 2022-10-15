@@ -48,8 +48,8 @@ class SaveReminderViewModelTest {
     private val selectedPOILiveDataObserver = mockk<Observer<PointOfInterest?>>(relaxed = true)
     private val latitudeLiveDataObserver = mockk<Observer<Double?>>(relaxed = true)
     private val longitudeLiveDataObserver = mockk<Observer<Double?>>(relaxed = true)
-    private val locationPermissionsRequestedLiveDataObserver =
-        mockk<Observer<Boolean>>(relaxed = true)
+    private val requestedPermissionsLiveDataObserver =
+        mockk<Observer<Array<String>>>(relaxed = true)
     private val locationPermissionsGrantedLiveDataObserver =
         mockk<Observer<Boolean>>(relaxed = true)
     private val locationSelectedLiveDataObserver = mockk<Observer<Boolean>>(relaxed = true)
@@ -74,7 +74,7 @@ class SaveReminderViewModelTest {
         testSubject.latitude.observeForever(latitudeLiveDataObserver)
         testSubject.longitude.observeForever(longitudeLiveDataObserver)
         testSubject.locationPermissionsRequested.observeForever(
-            locationPermissionsRequestedLiveDataObserver
+            requestedPermissionsLiveDataObserver
         )
         testSubject.locationPermissionsGranted.observeForever(
             locationPermissionsGrantedLiveDataObserver
@@ -100,7 +100,7 @@ class SaveReminderViewModelTest {
         testSubject.latitude.removeObserver(latitudeLiveDataObserver)
         testSubject.longitude.removeObserver(longitudeLiveDataObserver)
         testSubject.locationPermissionsRequested.removeObserver(
-            locationPermissionsRequestedLiveDataObserver
+            requestedPermissionsLiveDataObserver
         )
         testSubject.locationPermissionsGranted.removeObserver(
             locationPermissionsGrantedLiveDataObserver
