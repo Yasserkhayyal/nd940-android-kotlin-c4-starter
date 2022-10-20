@@ -18,11 +18,12 @@
 
     <application
         android:name=".MyApp"
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
         android:theme="@style/AppTheme.NoActionBar">
         <!-- adding parent activity to ReminderDescriptionActivity to increase user engagement
         with the app open tapping on a reminder notification -->

@@ -120,7 +120,7 @@ class SaveReminderViewModelTest {
             val reminderDataItem =
                 ReminderDataItem("testTitle", "testDescription", "Lat:29.5,Lng:31.2", 29.5, 31.2)
             val fakeReminderDTO =
-                ReminderDTO("testTitle", "testDescription", "Lat:29.5,Lng:31.2", 29.5, 31.2, "0")
+                ReminderDTO("testTitle", "testDescription", "Lat:29.5,Lng:31.2", 29.5, 31.2, 0)
             val expectedReminderList = mutableListOf(fakeReminderDTO)
 
             //When
@@ -133,6 +133,29 @@ class SaveReminderViewModelTest {
                 showToastLiveDataObserver.onChanged(application.getString(R.string.reminder_saved))
                 navigationCommandLiveDataObserver.onChanged(NavigationCommand.Back)
             }
+            fakeDataSource.reminderList shouldBeEqualTo expectedReminderList
+        }
+
+    @Test
+    fun saveReminder_is_successful_then_reminder_is_deleted_then_reminder_list_is_empty() =
+        mainCoroutineRule.scope.runTest {
+            //Given
+            val reminderDataItem =
+                ReminderDataItem("testTitle", "testDescription", "Lat:29.5,Lng:31.2", 29.5, 31.2)
+            val expectedReminderList = mutableListOf<ReminderDTO>()
+
+            //When
+            testSubject.saveReminder(reminderDataItem)
+            testSubject.deleteReminder(reminderDataItem)
+
+            //Then
+            verify(Ordering.SEQUENCE) {
+                loadingLiveDataObserver.onChanged(true)
+                loadingLiveDataObserver.onChanged(false)
+                showToastLiveDataObserver.onChanged(application.getString(R.string.reminder_saved))
+                navigationCommandLiveDataObserver.onChanged(NavigationCommand.Back)
+            }
+            //despite liveData variables showing successful saving op, the fakeDataSource's reminderList is empty because of the deletion
             fakeDataSource.reminderList shouldBeEqualTo expectedReminderList
         }
 
@@ -238,7 +261,7 @@ class SaveReminderViewModelTest {
                     "Lat:29.5,Lng:31.2",
                     29.5,
                     31.7,
-                    "0"
+                    0
                 )
             )
         }
@@ -275,7 +298,7 @@ class SaveReminderViewModelTest {
                         "Lat:17.5,Lng:22.1",
                         17.5,
                         22.1,
-                        "0"
+                        0
                     )
                 )
                 reminderDataItemLiveDataObserver.onChanged(
@@ -285,7 +308,7 @@ class SaveReminderViewModelTest {
                         "Lat:29.5,Lng:31.2",
                         29.5,
                         31.7,
-                        "0"
+                        0
                     )
                 )
             }

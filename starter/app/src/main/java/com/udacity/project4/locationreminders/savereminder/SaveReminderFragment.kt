@@ -24,7 +24,6 @@ import com.udacity.project4.locationreminders.geofence.GeofenceBroadcastReceiver
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import org.koin.android.ext.android.inject
-import java.util.concurrent.TimeUnit
 
 private const val GEOFENCE_RADIUS_IN_METERS = 100f
 private const val TAG = "SaveReminderFragment"
@@ -81,12 +80,18 @@ class SaveReminderFragment : BaseFragment() {
             }
         }
 
-        _viewModel.locationPermissionsGranted.observe(viewLifecycleOwner) {
+        _viewModel.locationSettingsEnabled.observe(viewLifecycleOwner) {
             if (it && _viewModel.reminderDataItem.value != null) {
                 _viewModel.clearEditingMode()
                 createGeofence(_viewModel.reminderDataItem.value!!)
             } else {
                 _viewModel.showSnackBarInt.value = R.string.invalid_geofence_data
+            }
+        }
+
+        _viewModel.locationPermissionsGranted.observe(viewLifecycleOwner) {
+            if (it) {
+                _viewModel.requestLocationSettings()
             }
         }
 
@@ -110,13 +115,13 @@ class SaveReminderFragment : BaseFragment() {
         // Build the Geofence Object
         val geofence = Geofence.Builder()
             // Set the request ID, string to identify the geofence.
-            .setRequestId(reminderDataItem.id)
+            .setRequestId(reminderDataItem.id.toString())
             // Set the circular region of this geofence.
             .setCircularRegion(
                 reminderDataItem.latitude!!,
                 reminderDataItem.longitude!!,
                 GEOFENCE_RADIUS_IN_METERS
-            ).setExpirationDuration(TimeUnit.DAYS.toMillis(30))
+            ).setExpirationDuration(Geofence.NEVER_EXPIRE)
             // Set the transition types of interest. Alerts are only generated for these
             // transition. We track entry and exit transitions in this sample.
             .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)

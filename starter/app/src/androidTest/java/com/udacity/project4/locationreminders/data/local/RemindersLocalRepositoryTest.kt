@@ -82,4 +82,50 @@ class RemindersLocalRepositoryTest {
         assertEquals(result.message, "Reminder not found!")
     }
 
+    @Test
+    fun getReminder_returns_expectedDate_after_deleting_a_reminder() = runBlocking {
+        val firstReminder = ReminderDTO(
+            title = "title",
+            description = "description",
+            location = "Landmark",
+            latitude = 25.3,
+            longitude = 17.5
+        )
+        val secondReminder = ReminderDTO(
+            title = "title_1",
+            description = "description_1",
+            location = "Landmark_!",
+            latitude = 33.0,
+            longitude = 22.7
+        )
+        localDataSource.saveReminder(firstReminder)
+        localDataSource.saveReminder(secondReminder)
+        localDataSource.deleteReminder(firstReminder)
+        // WHEN  - Task retrieved by ID.
+        val result = localDataSource.getReminders()
+        // THEN - Same task is returned.
+        result as Result.Success
+        //couldn't use kluent here, so resorted back to Junit assertion
+        assertEquals(result.data, listOf(secondReminder))
+    }
+
+    @Test
+    fun getReminder_returns_expectedDate_after_updating_a_reminder() = runBlocking {
+        val firstReminder = ReminderDTO(
+            title = "title",
+            description = "description",
+            location = "Landmark",
+            latitude = 25.3,
+            longitude = 17.5
+        )
+        localDataSource.saveReminder(firstReminder)
+        localDataSource.updateReminder(firstReminder.copy(title = "testTitle"))
+        // WHEN  - Task retrieved by ID.
+        val result = localDataSource.getReminder(firstReminder.id)
+        // THEN - Same task is returned.
+        result as Result.Success
+        //couldn't use kluent here, so resorted back to Junit assertion
+        assertEquals(result.data.title, "testTitle")
+    }
+
 }

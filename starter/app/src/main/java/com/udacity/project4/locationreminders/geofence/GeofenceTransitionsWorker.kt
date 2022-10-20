@@ -28,7 +28,7 @@ class GeofenceTransitionsWorker(
     override suspend fun doWork(): Result {
         return try {
             inputData.getString(REQUEST_ID_KEY)?.let { fenceId ->
-                val result = remindersLocalRepository.getReminder(fenceId)
+                val result = remindersLocalRepository.getReminder(fenceId.toInt())
                 if (result is com.udacity.project4.locationreminders.data.dto.Result.Success<ReminderDTO>) {
                     val reminderDTO = result.data
                     //send a notification to the user with the reminder details

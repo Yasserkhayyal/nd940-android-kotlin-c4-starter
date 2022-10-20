@@ -69,6 +69,11 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
                 enableMyLocation()
             }
         }
+        _viewModel.locationSettingsEnabled.observe(viewLifecycleOwner) {
+            if (it) {
+                zoomToDeviceLocation()
+            }
+        }
         menuHost.addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menuInflater.inflate(R.menu.map_options, menu)
@@ -106,6 +111,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         setPoiClick(map)
         setMapStyle(map)
         _viewModel.requestLocationPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION))
+        _viewModel.checkLocationSettingsEnabled()
     }
 
     private fun onLocationSelected(latLng: LatLng) {
@@ -170,7 +176,10 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     private fun enableMyLocation() {
         if (::mMap.isInitialized) {
             mMap.isMyLocationEnabled = true
-            zoomToDeviceLocation()
+            mMap.setOnMyLocationButtonClickListener {
+                _viewModel.requestLocationSettings()
+                true
+            }
         }
     }
 

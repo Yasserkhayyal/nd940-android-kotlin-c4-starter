@@ -2,6 +2,7 @@ package com.udacity.project4.locationreminders.reminderslist
 
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavDirections
 import androidx.navigation.Navigation
@@ -65,7 +66,6 @@ class ReminderListFragmentTest {
         fragmentScenario.close()
     }
 
-    //Not working :(
     @Test
     fun reminderDataItem_DisplayedInUi() = runTest {
         //Given
@@ -75,7 +75,7 @@ class ReminderListFragmentTest {
             "Lat: 21.0, Lng:28.0",
             21.0,
             28.0,
-            "0"
+            0
         )
         fakeDataSource.saveReminder(reminderDTO)
 
@@ -90,6 +90,56 @@ class ReminderListFragmentTest {
         onView(withId(R.id.description)).check(matches(withText(reminderDTO.description)))
         onView(withId(R.id.location)).check(matches(isDisplayed()))
         onView(withId(R.id.location)).check(matches(withText(reminderDTO.location)))
+        fragmentScenario.close()
+    }
+
+    @Test
+    fun given_a_reminder_is_added_then_removed_noDataTextView_DisplayedInUi() = runTest {
+        //Given
+        val reminderDTO = ReminderDTO(
+            "Reminder title",
+            "Reminder Description",
+            "Lat: 21.0, Lng:28.0",
+            21.0,
+            28.0,
+            0
+        )
+        fakeDataSource.saveReminder(reminderDTO)
+
+        //When
+        fragmentScenario = launchFragmentInContainer(themeResId = R.style.AppTheme)
+        dataBindingIdlingResource.monitorFragment(fragmentScenario)
+        fakeDataSource.deleteReminder(reminderDTO)
+        fragmentScenario.moveToState(Lifecycle.State.STARTED)//to re-trigger loading of data
+        fragmentScenario.moveToState(Lifecycle.State.RESUMED)
+
+
+        //Then
+        onView(withId(R.id.noDataTextView)).check(matches(isDisplayed()))
+        fragmentScenario.close()
+    }
+
+    @Test
+    fun given_a_reminder_is_added_then_updated_then_expected_data_DisplayedInUi() = runTest {
+        //Given
+        val reminderDTO = ReminderDTO(
+            "Reminder title",
+            "Reminder Description",
+            "Lat: 21.0, Lng:28.0",
+            21.0,
+            28.0,
+            0
+        )
+        fakeDataSource.saveReminder(reminderDTO)
+        fakeDataSource.updateReminder(reminderDTO.copy(title = "testTitle"))
+
+        //When
+        fragmentScenario = launchFragmentInContainer(themeResId = R.style.AppTheme)
+        dataBindingIdlingResource.monitorFragment(fragmentScenario)
+
+        //Then
+        onView(withId(R.id.title)).check(matches(isDisplayed()))
+        onView(withId(R.id.title)).check(matches(withText("testTitle")))
         fragmentScenario.close()
     }
 

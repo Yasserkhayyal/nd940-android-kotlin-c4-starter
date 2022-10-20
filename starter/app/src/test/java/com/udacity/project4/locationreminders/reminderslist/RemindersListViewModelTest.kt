@@ -20,7 +20,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.koin.core.context.stopKoin
-import org.koin.test.KoinTest
 import org.robolectric.annotation.Config
 
 @RunWith(AndroidJUnit4::class)
@@ -68,7 +67,7 @@ class RemindersListViewModelTest {
         mainCoroutineRule.scope.runTest {
             //Given
             val fakeReminderDTO =
-                ReminderDTO("testTitle", "testDescription", "Lat:29.5,Lng:31.2", 29.5, 31.2, "0")
+                ReminderDTO("testTitle", "testDescription", "Lat:29.5,Lng:31.2", 29.5, 31.2, 0)
             val fakeReminderDataItem = ReminderDataItem(
                 fakeReminderDTO.title,
                 fakeReminderDTO.description,

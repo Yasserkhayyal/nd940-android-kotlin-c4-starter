@@ -21,7 +21,19 @@ class FakeDataSource : ReminderDataSource {
         reminderList.add(reminder)
     }
 
-    override suspend fun getReminder(id: String): Result<ReminderDTO> {
+    override suspend fun updateReminder(reminder: ReminderDTO) {
+        reminderList.find { reminder.id == it.id }?.apply {
+            val index = reminderList.indexOf(this)
+            reminderList.remove(this)
+            reminderList.add(index, reminder)
+        }
+    }
+
+    override suspend fun deleteReminder(reminder: ReminderDTO) {
+        reminderList.remove(reminder)
+    }
+
+    override suspend fun getReminder(id: Int): Result<ReminderDTO> {
         return if (shouldShowError) {
             Result.Error("Test Exception")
         } else {

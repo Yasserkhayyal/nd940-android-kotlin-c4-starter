@@ -10,6 +10,7 @@ import com.udacity.project4.base.BaseViewModel
 import com.udacity.project4.base.NavigationCommand
 import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
+import com.udacity.project4.locationreminders.data.dto.Result
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import com.udacity.project4.utils.SingleLiveEvent
 import kotlinx.coroutines.launch
@@ -31,6 +32,10 @@ class SaveReminderViewModel(
     val longitude = MutableLiveData<Double?>()
     val locationPermissionsRequested = SingleLiveEvent<Array<String>>()
     val locationPermissionsGranted = SingleLiveEvent<Boolean>()
+    val locationSettingsRequested = SingleLiveEvent<Boolean>()
+    val locationSettingsEnabled = SingleLiveEvent<Boolean>()
+    val checkLocationSettingsEnabled =
+        SingleLiveEvent<Boolean>() //just checking without explicitly requesting
     val locationSelected = SingleLiveEvent<Boolean>()
     val reminderDataItem = MutableLiveData<ReminderDataItem?>()
     var isEditingMode: Boolean = false
@@ -41,8 +46,9 @@ class SaveReminderViewModel(
     fun saveReminder(reminderData: ReminderDataItem) {
         showLoading.value = true
         viewModelScope.launch {
-            dataSource.saveReminder(
-                ReminderDTO(
+            val result = dataSource.getReminder(reminderData.id)
+            if (result is Result.Error) { //reminder doesn't exist, insert it
+                val reminderDTO = ReminderDTO(
                     reminderData.title,
                     reminderData.description,
                     reminderData.location,
@@ -50,10 +56,35 @@ class SaveReminderViewModel(
                     reminderData.longitude,
                     reminderData.id
                 )
-            )
+                dataSource.saveReminder(reminderDTO)
+            } else {
+                val reminderDTO = ReminderDTO(
+                    reminderData.title,
+                    reminderData.description,
+                    reminderData.location,
+                    reminderData.latitude,
+                    reminderData.longitude,
+                    (result as Result.Success).data.id
+                )
+                dataSource.updateReminder(reminderDTO)
+            }
             showLoading.value = false
             showToast.value = app.getString(R.string.reminder_saved)
             navigationCommand.value = NavigationCommand.Back
+        }
+    }
+
+    fun deleteReminder(reminderDataItem: ReminderDataItem) {
+        val reminderDTO = ReminderDTO(
+            title = reminderDataItem.title,
+            description = reminderDataItem.description,
+            location = reminderDataItem.location,
+            latitude = reminderDataItem.latitude,
+            longitude = reminderDataItem.longitude,
+            id = reminderDataItem.id
+        )
+        viewModelScope.launch {
+            dataSource.deleteReminder(reminderDTO)
         }
     }
 
@@ -136,8 +167,20 @@ class SaveReminderViewModel(
         this.locationPermissionsRequested.value = locationPermissionsRequested
     }
 
+    fun requestLocationSettings() {
+        locationSettingsRequested.value = true
+    }
+
     fun setLocationPermissionsGranted() {
         locationPermissionsGranted.value = true
+    }
+
+    fun setLocationSettingsEnabled() {
+        locationSettingsEnabled.value = true
+    }
+
+    fun checkLocationSettingsEnabled() {
+        checkLocationSettingsEnabled.value = true
     }
 
     fun clearEditingMode() {

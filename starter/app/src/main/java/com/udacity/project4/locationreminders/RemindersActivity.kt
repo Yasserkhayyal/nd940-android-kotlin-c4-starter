@@ -21,6 +21,8 @@ import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
+import com.google.android.gms.location.LocationSettingsResponse
+import com.google.android.gms.tasks.Task
 import com.google.android.material.snackbar.Snackbar
 import com.udacity.project4.BuildConfig
 import com.udacity.project4.R
@@ -44,7 +46,7 @@ class RemindersActivity : BaseActivity() {
     private val appPermissionSettingsActivityLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (checkPermissionsGrantedFromAppSettings(viewModel.locationPermissionsRequested.value)) {
-                checkDeviceLocationSettings()
+                viewModel.setLocationPermissionsGranted()
             } else {
                 viewModel.locationPermissionsRequested.value?.let { permissions ->
                     requestLocationPermissions(permissions)
@@ -58,7 +60,7 @@ class RemindersActivity : BaseActivity() {
                     viewModel.locationPermissionsRequested.value
                 )
             ) {
-                checkDeviceLocationSettings()
+                viewModel.setLocationPermissionsGranted()
             } else {
                 // Permission denied.
                 Snackbar.make(
@@ -90,6 +92,17 @@ class RemindersActivity : BaseActivity() {
         viewModel.locationPermissionsRequested.observe(this) {
             if (!it.isNullOrEmpty()) {
                 requestLocationPermissions(it)
+            }
+        }
+        viewModel.locationSettingsRequested.observe(this) {
+            if (it) {
+                checkDeviceLocationSettings()
+            }
+        }
+
+        viewModel.checkLocationSettingsEnabled.observe(this) {
+            if (it) {
+                checkDeviceLocationSettingsEnabled()
             }
         }
     }
@@ -126,13 +139,7 @@ class RemindersActivity : BaseActivity() {
      *  the opportunity to turn on location services within our app.
      */
     private fun checkDeviceLocationSettings(resolve: Boolean = true) {
-        val locationRequest = LocationRequest.create().apply {
-            priority = LocationRequest.PRIORITY_LOW_POWER
-        }
-        val builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
-
-        val settingsClient = LocationServices.getSettingsClient(this)
-        val locationSettingsResponseTask = settingsClient.checkLocationSettings(builder.build())
+        val locationSettingsResponseTask = getLocationSettingsTaskResponse()
 
         locationSettingsResponseTask.addOnFailureListener { exception ->
             if (exception is ResolvableApiException && resolve) {
@@ -158,9 +165,28 @@ class RemindersActivity : BaseActivity() {
         }
         locationSettingsResponseTask.addOnSuccessListener {
             if (checkPermissionsGrantedFromAppSettings(viewModel.locationPermissionsRequested.value)) {
-                viewModel.setLocationPermissionsGranted()
+                viewModel.setLocationSettingsEnabled()
             }
         }
+    }
+
+    private fun checkDeviceLocationSettingsEnabled() {
+        val locationSettingsResponseTask = getLocationSettingsTaskResponse()
+        locationSettingsResponseTask.addOnSuccessListener {
+            if (checkPermissionsGrantedFromAppSettings(viewModel.locationPermissionsRequested.value)) {
+                viewModel.setLocationSettingsEnabled()
+            }
+        }
+    }
+
+    private fun getLocationSettingsTaskResponse(): Task<LocationSettingsResponse> {
+        val locationRequest = LocationRequest.create().apply {
+            priority = LocationRequest.PRIORITY_LOW_POWER
+        }
+        val builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
+
+        val settingsClient = LocationServices.getSettingsClient(this)
+        return settingsClient.checkLocationSettings(builder.build())
     }
 
     private fun showSnackBarRequestingAccessToUserLocation() =

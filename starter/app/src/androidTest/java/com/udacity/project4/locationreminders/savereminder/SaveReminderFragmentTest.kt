@@ -1,6 +1,7 @@
 package com.udacity.project4.locationreminders.savereminder
 
 import android.os.Bundle
+import android.view.View
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.navigation.NavController
@@ -10,11 +11,11 @@ import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.espresso.matcher.ViewMatchers.withText
+import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
 import com.udacity.project4.R
+import com.udacity.project4.ToastMatcher.Companion.onToast
 import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import com.udacity.project4.util.DataBindingIdlingResource
@@ -36,6 +37,7 @@ import org.koin.core.context.GlobalContext.get
 class SaveReminderFragmentTest {
 
     private lateinit var fragmentScenario: FragmentScenario<SaveReminderFragment>
+    private lateinit var decorView: View
     private val fakeDataSource by get().koin.inject<ReminderDataSource>()
 
     // An idling resource that waits for Data Binding to have no pending bindings.
@@ -65,7 +67,7 @@ class SaveReminderFragmentTest {
             location = "Landmark",
             latitude = 25.3,
             longitude = 17.5,
-            id = "0"
+            id = 0
         )
         val bundle = SaveReminderFragmentArgs(reminderDataItem).toBundle()
         fragmentScenario = launchFragmentInContainer(bundle, themeResId = R.style.AppTheme)
@@ -86,7 +88,7 @@ class SaveReminderFragmentTest {
             location = "Landmark",
             latitude = 25.3,
             longitude = 17.5,
-            id = "0"
+            id = 0
         )
         val bundle = SaveReminderFragmentArgs(reminderDataItem).toBundle()
         fragmentScenario = launchFragmentInContainer(bundle, themeResId = R.style.AppTheme)
@@ -117,6 +119,35 @@ class SaveReminderFragmentTest {
         onView(withId(R.id.saveReminder)).perform(click())
         onView(withId(com.google.android.material.R.id.snackbar_text))
             .check(matches(withText(R.string.err_enter_title)))
+        fragmentScenario.close()
+    }
+
+    @Test
+    fun given_saveReminder_is_clicked_while_data_is_empty_invalid_data_toast_is_shown() {
+        val navController = mockk<NavController> {
+            every { popBackStack() } returns true
+        }
+        fragmentScenario = launchFragmentInContainer<SaveReminderFragment>(
+            Bundle(),
+            themeResId = R.style.AppTheme
+        ).onFragment {
+            decorView = it.requireActivity().window.decorView
+            Navigation.setViewNavController(it.view!!, navController)
+            with(it._viewModel) {
+                saveReminder(
+                    ReminderDataItem(
+                        title = "title",
+                        description = "description",
+                        location = "Landmark",
+                        latitude = 25.3,
+                        longitude = 17.5
+                    )
+                )
+            }
+        }
+        dataBindingIdlingResource.monitorFragment(fragmentScenario)
+        //Not sure if this work on API 30 and above, I have tested it on API 29
+        onToast(R.string.reminder_saved).check(matches(isDisplayed()))
         fragmentScenario.close()
     }
 

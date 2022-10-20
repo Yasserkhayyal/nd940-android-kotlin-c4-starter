@@ -41,24 +41,25 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
             if (geofencingEvent.geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
                 Log.v(TAG, context.getString(R.string.geofence_entered))
 
-                val fenceId = when {
+                when {
                     geofencingEvent.triggeringGeofences.isNotEmpty() ->
-                        geofencingEvent.triggeringGeofences[0].requestId
+                        geofencingEvent.triggeringGeofences.forEach { geofence ->
+                            WorkManager.getInstance(context)
+                                .beginUniqueWork(
+                                    GeofenceTransitionsWorker.WORK_NAME,
+                                    ExistingWorkPolicy.APPEND,
+                                    OneTimeWorkRequestBuilder<GeofenceTransitionsWorker>().setInputData(
+                                        workDataOf(
+                                            GeofenceTransitionsWorker.REQUEST_ID_KEY to geofence.requestId
+                                        )
+                                    ).build()
+                                ).enqueue()
+                        }
                     else -> {
                         Log.e(TAG, "No Geofence Trigger Found! Abort mission!")
                         return
                     }
                 }
-                WorkManager.getInstance(context)
-                    .beginUniqueWork(
-                        GeofenceTransitionsWorker.WORK_NAME,
-                        ExistingWorkPolicy.REPLACE,
-                        OneTimeWorkRequestBuilder<GeofenceTransitionsWorker>().setInputData(
-                            workDataOf(
-                                GeofenceTransitionsWorker.REQUEST_ID_KEY to fenceId
-                            )
-                        ).build()
-                    ).enqueue()
             }
         }
 
